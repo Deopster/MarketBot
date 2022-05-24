@@ -4,6 +4,7 @@ import mss
 import time
 from PIL import Image, ImageChops
 import numpy as np
+import sys
 import os
 import cv2
 import pytesseract
@@ -19,6 +20,12 @@ def send(name,mess):
     with open("new_say.png", "rb") as f:
         webhook.add_file(file=f.read(), filename='example.jpg')
     response = webhook.execute()
+def read(f):
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    image = cv2.imread(f)
+    gray_im = cv2.cvtColor(image, cv2.IMREAD_GRAYSCALE)
+    d = pytesseract.image_to_string(gray_im, lang='rus')
+    return d
 def partscreen(x, y, top, left,mode):
     with mss.mss() as sct:
         monitor_number = 2
@@ -60,13 +67,27 @@ def find_ellement():
             y-=110
             time.sleep(0.1)
             if temp==0:
-                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-                image = cv2.imread("new_say.png")
-                gray_im = cv2.cvtColor(image, cv2.IMREAD_GRAYSCALE)
-                d=pytesseract.image_to_string(gray_im,lang='rus')
+                d=read("new_say.png")
                 s = d.split('\n')
                 name=s[0]
-            send(temp,name)
+                print(name)
+            im = Image.open("new_say.png")
+            img = im.convert("RGB")
+            pixdata = img.load()
+            for u in range(img.size[1]):
+                for x in range(img.size[0]):
+                    if pixdata[x, u] <= (57, 57, 49) and pixdata[x, u] >= (0, 0, 0):
+                        pixdata[x, u] = (255, 255, 255)
+                    else:
+                        pixdata[x, u] = (0, 0, 0)
+            img.crop((270, 55, 390, 77)).save('f.jpg', quality=100)
+            time.sleep(1)
+            i = cv2.imread('f.jpg', cv2.IMREAD_GRAYSCALE)
+
+            p = pytesseract.image_to_string(i, config=r'--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789')
+            print(p)
+            mess=name+" "+p
+            send(temp,mess)
             temp+=1
             print(s)
     else:
