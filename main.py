@@ -2,7 +2,7 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 from mss import mss
 import mss
 import time
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageEnhance
 import numpy as np
 import sys
 import os
@@ -82,10 +82,10 @@ def find_ellement():
                         pixdata[x, u] = (0, 0, 0)
             img.crop((270, 55, 390, 77)).save('f.jpg', quality=100)
             time.sleep(1)
-            i = cv2.imread('f.jpg', cv2.IMREAD_GRAYSCALE)
-
-            p = pytesseract.image_to_string(i, config=r'--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789')
+            i = Image.open('f.jpg')
+            p = pytesseract.image_to_string(i, config=r'--psm 6 -c tessedit_char_whitelist=0123456789')
             print(p)
+            time.sleep(10000)
             mess=name+" "+p
             send(temp,mess)
             temp+=1
