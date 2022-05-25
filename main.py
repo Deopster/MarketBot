@@ -5,11 +5,54 @@ import mss
 import time
 from PIL import Image, ImageChops, ImageEnhance
 import numpy as np
-import sys
-import os
+import sqlite3
 import cv2
 import pytesseract
+import datetime
+import dearpygui.dearpygui as dpg
+import dearpygui.demo as demo
 import math, operator
+def Bd(name,cost,ammount,temp):
+    name = name.replace("-", "_")
+    cur.executescript("CREATE TABLE IF NOT EXISTS " + name + """(
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   cost int,
+                   ammount int,
+                   place int,
+                   date TEXT,
+                   time TEXT);""")
+    conn.commit()
+    cur.execute("INSERT INTO " + name + """ (cost, ammount, place, date,time)
+          VALUES(?, ?, ?, ?, ?)""", (cost, ammount, temp, str(datetime.date.today()),str(datetime.datetime.now().strftime("%H:%M"))))
+    print(name)
+    # cur.execute('SELECT id FROM lots WHERE (lotname=?)', (name,))
+    # entry = cur.fetchone()
+    # if entry is None:
+    #     cur.execute('INSERT INTO lots (lotname, selling) VALUES (?,?)', (name, 1))
+    #     conn.commit()
+    #     # cur.execute('SELECT * FROM lots')
+    #     cur.execute('SELECT id FROM lots WHERE (lotname=?)', (name,))
+    #     n = cur.fetchone()[0]
+    #     bd = 'dada-dada'
+    #     # bd=str(n)+'tab'
+    #     conn.commit()
+    #     cur.executescript("CREATE TABLE IF NOT EXISTS " + bd+ """(
+    #               id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #               cost int,
+    #               ammount int,
+    #               place int,
+    #               date TEXT);""")
+    #     conn.commit()
+    # else:
+    #     cur.execute('SELECT id FROM lots WHERE (lotname=?)', (name,))
+    #     n = cur.fetchone()[0]
+    #     conn.commit()
+    #     bd = 'dada-dada'
+    #     # bd=str(n)+'tab'
+    # cur.execute("INSERT INTO " + bd + """" (cost, ammount, place, date)
+    #       VALUES(?, ?, ?, ?)""", (cost, ammount, temp, 'ddd'))
+    # cursor.execute("SELECT `price` FROM `catalog` WHERE `id` = ? ", (id,))
+    # conn.commit()
 def compare(im1,im2):
     img1 = Image.open(im1)
     img2 = Image.open(im2)
@@ -29,7 +72,6 @@ def read(f):
     return d
 def partscreen(x, y, top, left,mode):
     with mss.mss() as sct:
-        monitor_number = 2
         mon = sct.monitors[monitor_number]
         monitor = {
             "top": mon["top"] + top,  # 100px from the top
@@ -110,15 +152,32 @@ def find_ellement():
             img2 = Image.open('fin_num.jpg')
             allo = num_det.detect(img2,2)
             # Вывод в дискорд
-            mess=name+" цена:"+str(p)+" колличество "+str(allo)
-            print(mess)
-            send(temp,mess)
+            trigger=138800
+            if p>=trigger:
+                mess="Лот "+name+" достиг указанной вами цены верхнего порога - "+str(trigger) +" цена:"+str(p)+" колличество "+str(allo) + " строка товара "+str(9-temp)
+                send(None,mess)
+            Bd(name, p, allo, temp)
             temp+=1
     else:
         print('хуй там')
 if __name__ == '__main__':
+    conn = sqlite3.connect(r'bd.db')
+    cur = conn.cursor()
+    monitor_number = 2
+
+    dpg.create_context()
+    dpg.create_viewport(title='warspear bot', width=600, height=600)
+    dpg.setup_dearpygui()
+    dpg.show_viewport()
+    dpg.start_dearpygui()
+    dpg.destroy_context()
+
     while True:
         partscreen(420, 940, 60, 740, 1)
-        time.sleep(0.5)
         find_ellement()
-        time.sleep(100)
+        time.sleep(1000)
+
+
+
+
+

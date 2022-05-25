@@ -124,8 +124,7 @@ def detect(f,mode):
                 for s in n:
                     if i == s:
                         recognit+=str(n[0])
-
-    print(recognit)
+    print(res)
     return int(recognit)
 
     # if __name__ == '__main__':
