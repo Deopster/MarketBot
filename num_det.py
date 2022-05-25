@@ -65,7 +65,6 @@ def detect(f,mode):
                 found=True
     for i in nums:
         x, y = i
-        print(i)
         if y-x<4:
             gren.append(i)
     for i in gren:
@@ -113,7 +112,6 @@ def detect(f,mode):
         index+=1
         res.append(temp)
         temp=[]
-    print(res)
     if mode==1:
         for i in res:
             for n in numbers:

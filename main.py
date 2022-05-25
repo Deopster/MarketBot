@@ -111,9 +111,9 @@ def find_ellement():
             allo = num_det.detect(img2,2)
             # Вывод в дискорд
             mess=name+" цена:"+str(p)+" колличество "+str(allo)
+            print(mess)
             send(temp,mess)
             temp+=1
-            print(s)
     else:
         print('хуй там')
 if __name__ == '__main__':
